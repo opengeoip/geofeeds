@@ -93,7 +93,7 @@ jobs:
       - if: steps.compare.outputs.changed == 'true'
         name: Release
         run: |
-          tag=$(date -u +%Y-%m-%d)
+          tag=$(date -u +%Y.%-m.%-d)
           if gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" > /dev/null 2>&1; then
             gh release upload "${tag}" dist/geofeeds.csv dist/SHA256SUMS --repo "${GITHUB_REPOSITORY}" --clobber
             gh release edit "${tag}" --repo "${GITHUB_REPOSITORY}" --notes-file dist/notes.md --latest
