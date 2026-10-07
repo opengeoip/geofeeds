@@ -20,6 +20,10 @@ env:
   KEEP_RELEASES: "60"
   LIST_LIMIT: "100"
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   publish:
     name: Publish
