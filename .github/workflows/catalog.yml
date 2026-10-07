@@ -80,7 +80,7 @@ jobs:
               total=$(printf '%s' "$2" | grep -c . || true)
               if [ "${total}" -gt 0 ]; then
                 echo; echo "$1:"
-                printf '%s\n' "$2" | head -n "${LIST_LIMIT}" | sed 's/^/- /'
+                printf '%s\n' "$2" | sed -n "1,${LIST_LIMIT}s/^/- /p"
                 if [ "${total}" -gt "${LIST_LIMIT}" ]; then echo "- … and $((total - LIST_LIMIT)) more"; fi
               fi
             }
