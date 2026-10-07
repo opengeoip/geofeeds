@@ -11,6 +11,28 @@ Every day, the catalog is rebuilt from the latest registry dumps of RIPE NCC, AP
 https://github.com/opengeoip/geofeeds/releases/latest/download/geofeeds.csv
 ```
 
+Releases are named after their date, as `YEAR.MONTH.DAY` (`2026.10.7`), a valid semantic version. To pin a catalog and let [Renovate](https://docs.renovatebot.com/) update it, reference a release explicitly:
+
+```sh
+# renovate: datasource=github-releases depName=opengeoip/geofeeds
+GEOFEEDS_VERSION=2026.10.7
+geoip-builder run --geofeeds "https://github.com/opengeoip/geofeeds/releases/download/${GEOFEEDS_VERSION}/geofeeds.csv"
+```
+
+with a custom manager in `renovate.json`:
+
+```json
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/(^|/)[^/]+\\.sh$/"],
+      "matchStrings": ["# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\w+=(?<currentValue>\\S+)"]
+    }
+  ]
+}
+```
+
 ## Columns
 
 | Column | Content |
