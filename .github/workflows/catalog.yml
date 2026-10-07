@@ -1,0 +1,100 @@
+name: Catalog
+
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  push:
+    branches:
+      - main
+    paths:
+      - manual.csv
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: catalog
+  cancel-in-progress: false
+
+env:
+  KEEP_RELEASES: "60"
+
+jobs:
+  publish:
+    name: Publish
+    if: github.repository_owner == 'opengeoip'
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Download geoip-builder
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p tool
+          cd tool
+          gh release download --repo opengeoip/geoip-builder --pattern "geoip-builder-*-x86_64-unknown-linux-musl.tar.gz" --pattern SHA256SUMS
+          sha256sum --check --ignore-missing SHA256SUMS
+          gh attestation verify geoip-builder-*-x86_64-unknown-linux-musl.tar.gz --repo opengeoip/geoip-builder
+          tar -xzf geoip-builder-*-x86_64-unknown-linux-musl.tar.gz --strip-components=1
+      - name: Build the catalog
+        run: |
+          mkdir -p dist
+          tool/geoip-builder discover --fetch --data-dir data --manual manual.csv --output dist/geofeeds.csv
+          tool/geoip-builder check-catalog dist/geofeeds.csv
+      - id: compare
+        name: Compare with the latest release
+        run: |
+          if gh release download --repo "${GITHUB_REPOSITORY}" --pattern geofeeds.csv --dir previous 2>/dev/null; then
+            previous=previous/geofeeds.csv
+          else
+            mkdir -p previous
+            printf 'url,network,source\n' > previous/geofeeds.csv
+            previous=previous/geofeeds.csv
+          fi
+          if cmp --silent "${previous}" dist/geofeeds.csv; then
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          echo "changed=true" >> "${GITHUB_OUTPUT}"
+          urls() { tail -n +2 "$1" | cut -d, -f1 | sort -u; }
+          added=$(comm -13 <(urls "${previous}") <(urls dist/geofeeds.csv))
+          removed=$(comm -23 <(urls "${previous}") <(urls dist/geofeeds.csv))
+          {
+            echo "$(tail -n +2 dist/geofeeds.csv | wc -l) rows, $(urls dist/geofeeds.csv | wc -l) geofeeds."
+            echo
+            echo "$(printf '%s' "${added}" | grep -c . || true) geofeeds added, $(printf '%s' "${removed}" | grep -c . || true) removed."
+            if [ -n "${added}" ]; then echo; echo "Added:"; printf '%s\n' "${added}" | sed 's/^/- /'; fi
+            if [ -n "${removed}" ]; then echo; echo "Removed:"; printf '%s\n' "${removed}" | sed 's/^/- /'; fi
+          } > dist/notes.md
+      - if: steps.compare.outputs.changed == 'true'
+        working-directory: dist
+        run: sha256sum geofeeds.csv > SHA256SUMS
+      - if: steps.compare.outputs.changed == 'true'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist/geofeeds.csv
+      - if: steps.compare.outputs.changed == 'true'
+        name: Release
+        run: |
+          tag=$(date -u +%Y-%m-%d)
+          if gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" > /dev/null 2>&1; then
+            gh release upload "${tag}" dist/geofeeds.csv dist/SHA256SUMS --repo "${GITHUB_REPOSITORY}" --clobber
+            gh release edit "${tag}" --repo "${GITHUB_REPOSITORY}" --notes-file dist/notes.md --latest
+          else
+            gh release create "${tag}" dist/geofeeds.csv dist/SHA256SUMS --repo "${GITHUB_REPOSITORY}" --title "${tag}" --notes-file dist/notes.md --latest
+          fi
+      - if: steps.compare.outputs.changed == 'true'
+        name: Prune old releases
+        run: |
+          gh release list --repo "${GITHUB_REPOSITORY}" --limit 1000 --json tagName,createdAt --jq 'sort_by(.createdAt) | reverse | .[env.KEEP_RELEASES | tonumber:] | .[].tagName' |
+            while read -r tag; do
+              gh release delete "${tag}" --repo "${GITHUB_REPOSITORY}" --cleanup-tag --yes
+            done

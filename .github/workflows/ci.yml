@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  manual:
+    name: Manual list
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      attestations: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Download geoip-builder
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p tool
+          cd tool
+          gh release download --repo opengeoip/geoip-builder --pattern "geoip-builder-*-x86_64-unknown-linux-musl.tar.gz" --pattern SHA256SUMS
+          sha256sum --check --ignore-missing SHA256SUMS
+          gh attestation verify geoip-builder-*-x86_64-unknown-linux-musl.tar.gz --repo opengeoip/geoip-builder
+          tar -xzf geoip-builder-*-x86_64-unknown-linux-musl.tar.gz --strip-components=1
+      - run: tool/geoip-builder check-catalog manual.csv
+
+  pr-title:
+    name: Pull request title
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-26.04
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+  result:
+    name: CI result
+    if: always()
+    needs:
+      - manual
+      - pr-title
+    runs-on: ubuntu-26.04
+    steps:
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

@@ -1,0 +1,13 @@
+url,network,source
+https://api.cloudflare.com/local-ip-ranges.csv,,manual
+https://frantech.ca/geofeed.csv,,manual
+https://geofeed.cogentco.com/,,manual
+https://geofeed.constant.com/,,manual
+https://geofeed.hostuniversal.com.au/geofeed.csv,,manual
+https://geoip.linode.com/,,manual
+https://geoip.starlinkisp.net/feed.csv,,manual
+https://ip-ranges.amazonaws.com/geo-ip-feed.csv,,manual
+https://www.digitalocean.com/geo/google.csv,,manual
+https://www.gstatic.com/geofeed/corp_external,,manual
+https://www.gstatic.com/ipranges/cloud_geofeed,,manual
+https://www.hetzner.com/geofeed.csv,,manual
