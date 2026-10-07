@@ -18,6 +18,7 @@ concurrency:
 
 env:
   KEEP_RELEASES: "60"
+  LIST_LIMIT: "100"
 
 jobs:
   publish:
@@ -71,8 +72,16 @@ jobs:
             echo "$(tail -n +2 dist/geofeeds.csv | wc -l) rows, $(urls dist/geofeeds.csv | wc -l) geofeeds."
             echo
             echo "$(printf '%s' "${added}" | grep -c . || true) geofeeds added, $(printf '%s' "${removed}" | grep -c . || true) removed."
-            if [ -n "${added}" ]; then echo; echo "Added:"; printf '%s\n' "${added}" | sed 's/^/- /'; fi
-            if [ -n "${removed}" ]; then echo; echo "Removed:"; printf '%s\n' "${removed}" | sed 's/^/- /'; fi
+            list() {
+              total=$(printf '%s' "$2" | grep -c . || true)
+              if [ "${total}" -gt 0 ]; then
+                echo; echo "$1:"
+                printf '%s\n' "$2" | head -n "${LIST_LIMIT}" | sed 's/^/- /'
+                if [ "${total}" -gt "${LIST_LIMIT}" ]; then echo "- … and $((total - LIST_LIMIT)) more"; fi
+              fi
+            }
+            list Added "${added}"
+            list Removed "${removed}"
           } > dist/notes.md
       - if: steps.compare.outputs.changed == 'true'
         working-directory: dist
