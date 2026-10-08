@@ -1,13 +1,13 @@
-url,network,source
-https://api.cloudflare.com/local-ip-ranges.csv,,manual
-https://frantech.ca/geofeed.csv,,manual
-https://geofeed.cogentco.com/,,manual
-https://geofeed.constant.com/,,manual
-https://geofeed.hostuniversal.com.au/geofeed.csv,,manual
-https://geoip.linode.com/,,manual
-https://geoip.starlinkisp.net/feed.csv,,manual
-https://ip-ranges.amazonaws.com/geo-ip-feed.csv,,manual
-https://www.digitalocean.com/geo/google.csv,,manual
-https://www.gstatic.com/geofeed/corp_external,,manual
-https://www.gstatic.com/ipranges/cloud_geofeed,,manual
-https://www.hetzner.com/geofeed.csv,,manual
+url,network,source,asn
+https://api.cloudflare.com/local-ip-ranges.csv,,manual,13335 14789 132892 139242 202623 203898 395747
+https://frantech.ca/geofeed.csv,,manual,53667
+https://geofeed.cogentco.com/,,manual,174 1790
+https://geofeed.constant.com/,,manual,20473 46407
+https://geofeed.hostuniversal.com.au/geofeed.csv,,manual,136557
+https://geoip.linode.com/,,manual,20940 63949
+https://geoip.starlinkisp.net/feed.csv,,manual,14593 27277
+https://ip-ranges.amazonaws.com/geo-ip-feed.csv,,manual,7224 8987 14618 16509 21664 62785 214101 401395
+https://www.digitalocean.com/geo/google.csv,,manual,14061
+https://www.gstatic.com/geofeed/corp_external,,manual,36383 36384 36411 41264 45566 395973
+https://www.gstatic.com/ipranges/cloud_geofeed,,manual,15169 19527 43515 139070 139190 396982
+https://www.hetzner.com/geofeed.csv,,manual,24940 212317 213230 215859
