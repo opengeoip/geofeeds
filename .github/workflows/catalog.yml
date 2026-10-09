@@ -111,3 +111,23 @@ jobs:
             while read -r tag; do
               gh release delete "${tag}" --repo "${GITHUB_REPOSITORY}" --cleanup-tag --yes
             done
+
+  databases:
+    name: Databases
+    needs: publish
+    if: ${{ !cancelled() && github.repository_owner == 'opengeoip' }}
+    runs-on: ubuntu-26.04
+    environment: release
+    permissions: {}
+    steps:
+      - id: token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.BOT_CLIENT_ID }}
+          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
+          repositories: databases
+          permission-contents: write
+      - name: Trigger the databases build
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+        run: gh api --method POST repos/opengeoip/databases/dispatches --field event_type=catalog
