@@ -1,5 +1,6 @@
 url,asn
 https://api.cloudflare.com/local-ip-ranges.csv,13335 14789 132892 139242 202623 203898 395747
+https://as42708.net/geofeed.csv,42708 49282
 https://frantech.ca/geofeed.csv,53667
 https://geofeed.cogentco.com/,174 1790
 https://geofeed.constant.com/,20473 46407
