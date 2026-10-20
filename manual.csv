@@ -1,6 +1,7 @@
 url,asn
 https://api.cloudflare.com/local-ip-ranges.csv,13335 14789 132892 139242 202623 203898 395747
 https://as42708.net/geofeed.csv,42708 49282
+https://dline-media.com/files/geo-ip-feed.csv,50284 213316
 https://frantech.ca/geofeed.csv,53667
 https://geofeed.cogentco.com/,174 1790
 https://geofeed.constant.com/,20473 46407
@@ -11,6 +12,8 @@ https://geoip.starlinkisp.net/feed.csv,14593 27277 45700
 https://herza.id/Herza-Geo-IPs.csv,140443
 https://ip-ranges.amazonaws.com/geo-ip-feed.csv,7224 8987 14618 16509 21664 62785 214101 401395
 https://metrompls.com/geofeed.csv,262248
+https://raw.githubusercontent.com/iBasisUS/iBasis/refs/heads/main/geofeed.csv,10074 11889 14616
+https://sincere.cloud/geofeeds.csv,272996
 https://wainet.com.ve/geo/geofeed.csv,275004
 https://www.digitalocean.com/geo/google.csv,14061
 https://www.gstatic.com/geofeed/corp_external,36383 36384 36411 41264 45566 395973
